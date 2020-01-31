@@ -6,6 +6,8 @@ const { jwtSecret } = require('../config/secrets.js');
 
 const Users = require('../users/users-model.js');
 
+//Endpoints for /api/auth/
+
 router.post('/register', (req, res) => {
   let user = req.body;
   const hash = bcrypt.hashSync(user.password, 10);
