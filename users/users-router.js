@@ -1,34 +1,29 @@
-const db = require('../database/dbConfig.js');
+const router = require('express').Router();
 
-module.exports = {
-    add,
-    find,
-    findBy,
-    findById,
-    remove
-};
+const Users = require('./users-model.js');
+const authenticate = require('../auth/authenticate-middleware.js');
 
-function find(){
-    return db('users').select('id', 'username', 'password', 'department');
-}
 
-function findBy(filter){
-    return db('users').where(filter);
-}
+//endpoints for /api/users
+router.get('/', authenticate, (req, res) => {
+    Users.find()
+    .then(users => {
+        res.json(users);
+    })
+    .catch(err => res.send(err));
+});
 
-async function add(user){
-    const [id] = await db('users').insert(user);
-    return findById(id);
-}
+router.delete('/:id', (req, res) => {
+    Users.remove(req.params.id)
+    .then(deleted =>{
+      res.status(204).json(deleted);
+    })
+    .catch(error => {
+      console.log(error);
+      res.status(500).json({
+        error: "The User could not be removed"
+      });
+    });
+});
 
-function findById(id){
-    return db('users')
-    .where({ id })
-    .first();
-}
-
-function remove(id) {
-    return db('users')
-      .where('id', id)
-      .del();
-  }
+module.exports = router;

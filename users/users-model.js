@@ -1,28 +1,34 @@
-const router = require('express').Router();
+const db = require('../database/dbConfig.js');
 
-const Users = require('./users-model.js');
-const restricted = require('../auth/restricted-middleware.js');
+module.exports = {
+    add,
+    find,
+    findBy,
+    findById,
+    remove
+};
 
-//endpoints for /api/users
-router.get('/', restricted, (req, res) => {
-    Users.find()
-    .then(users => {
-        res.json(users);
-    })
-    .catch(err => res.send(err));
-});
+function find(){
+    return db('users').select('id', 'username', 'password', 'department');
+}
 
-router.delete('/:id', (req, res) => {
-    Users.remove(req.params.id)
-    .then(deleted =>{
-      res.status(204).json(deleted);
-    })
-    .catch(error => {
-      console.log(error);
-      res.status(500).json({
-        error: "The User could not be removed"
-      });
-    });
-});
+function findBy(filter){
+    return db('users').where(filter);
+}
 
-module.exports = router;
+async function add(user){
+    const [id] = await db('users').insert(user);
+    return findById(id);
+}
+
+function findById(id){
+    return db('users')
+    .where({ id })
+    .first();
+}
+
+function remove(id) {
+    return db('users')
+      .where('id', id)
+      .del();
+  }
